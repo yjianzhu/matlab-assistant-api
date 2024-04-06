@@ -85,6 +85,7 @@ classdef(Sealed) openAIAssistant < handle
             return_status = return_obj.Body.Data.status;
         end
         function message_obj = get_message(this)
+            % Get the message object
             %curl https://api.openai.com/v1/threads/thread_abc123/messages \
             %   -H "Content-Type: application/json" \
             %   -H "Authorization: Bearer $OPENAI_API_KEY" \
@@ -101,6 +102,88 @@ classdef(Sealed) openAIAssistant < handle
                 disp(message_obj.Body.Data.data(i).content.text.value);
             end
         end
+        
+        % file modify, upload, delete. April 6,2024 by yjianzhu
+        function file_list = get_files(this)
+            % Get the file list attached to the assistant,
+            % curl https://api.openai.com/v1/assistants/asst_abc123/files \
+            % -H "Authorization: Bearer $OPENAI_API_KEY" \
+            % -H "Content-Type: application/json" \
+            % -H "OpenAI-Beta: assistants=v1"
+            file_list = llms.internal.Assistant_get(this.api_key, this.api_url + "/files");
+        end
+
+        function delete_file(this, file_id)
+            % Delete a file attached to the assistant,
+            % curl https://api.openai.com/v1/assistants/asst_abc123/files/file-abc123 \
+            % -H "Authorization: Bearer $OPENAI_API_KEY" \
+            % -H "Content-Type: application/json" \
+            % -H "OpenAI-Beta: assistants=v1" \
+            % -X DELETE   
+            llms.internal.Assistant_delete(this.api_key, this.api_url + "/files/" + file_id);
+        end
+        
+        function file_id = upload_file(this, file_path)
+            % Upload a file to openai storage.
+            % curl https://api.openai.com/v1/files \
+            % -H "Authorization: Bearer $OPENAI_API_KEY" \
+            % -F purpose="assistants" \
+            % -F file="@mydata.jsonl"
+            return_obj = llms.internal.Assistant_upload_file(this.api_key, "https://api.openai.com/v1/files", file_path);
+            file_id = return_obj.Body.Data.id;
+        end
+
+        function file_id = update_single_file(this,file_path,old_file_id)
+            % Delete old file and upload new file. 如果没有给old_file_id，则删除所有文件.
+            % curl https://api.openai.com/v1/assistants/asst_abc123/files \
+            % -H 'Authorization: Bearer $OPENAI_API_KEY"' \
+            % -H 'Content-Type: application/json' \
+            % -H 'OpenAI-Beta: assistants=v1' \
+            % -d '{
+            %   "file_id": "file-abc123"
+            % }'
+        
+          
+            arguments
+                this
+                file_path 
+                old_file_id  = ""
+            end
+
+            if old_file_id ~= ""
+                this.delete_file(old_file_id);
+            else
+                % Get the file list
+                file_list = this.get_files();
+                % Delete the old file
+                for i = 1:length(file_list.Body.Data.data)
+                    this.delete_file(file_list.Body.Data.data(i).id);
+                end
+            end
+
+            % Upload the new file by modify the assistant
+            file_id = this.upload_file(file_path);
+
+            % link the file to the assistant
+            llms.internal.Assistant_post(this.api_key, this.api_url + "/files", {"file_id", file_id});
+        end
+
+        function update_instruction(this, instruction)
+            % Update the instruction of the assistant
+            % curl https://api.openai.com/v1/assistants/asst_abc123 \
+            % -H "Content-Type: application/json" \
+            % -H "Authorization: Bearer $OPENAI_API_KEY" \
+            % -H "OpenAI-Beta: assistants=v1" \
+            % -d '{
+            %     "instructions": "You are an HR bot, and you have access to files to answer employee questions about company policies. Always response with info from either of the files.",
+            %     "tools": [{"type": "retrieval"}],
+            %     "model": "gpt-4",
+            %     "file_ids": ["file-abc123", "file-abc456"]
+            %     }'
+            % POST
+            llms.internal.Assistant_post(this.api_key, this.api_url, {"instructions", instruction});
+        end
+
     end
 
 end
