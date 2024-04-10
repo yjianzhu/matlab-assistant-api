@@ -1,4 +1,4 @@
-function [response, streamedText] = Assistant_upload_file(api_key, endpoint,file_path, timeout, streamFun)
+function [response, streamedText] = openai_get(api_key, endpoint, timeout, streamFun)
     %sendRequest Sends a request to an ENDPOINT using PARAMETERS and
     %   api key api_key. TIMEOUT is the nubmer of seconds to wait for initial
     %   server connection. STREAMFUN is an optional callback function.
@@ -8,7 +8,6 @@ function [response, streamedText] = Assistant_upload_file(api_key, endpoint,file
     arguments
         api_key
         endpoint
-        file_path
         timeout = 10
         streamFun = []
     end
@@ -18,14 +17,7 @@ function [response, streamedText] = Assistant_upload_file(api_key, endpoint,file
     headers = [matlab.net.http.HeaderField('Authorization', "Bearer " + api_key)];
     
     % Define the request message
-    % -F purpose="assistants" \
-    % -F file="@mydata.jsonl"
-    body = matlab.net.http.io.MultipartFormProvider(...
-    'purpose',"assistants",...
-    'file', matlab.net.http.io.FileProvider(file_path));
-
-
-    request = matlab.net.http.RequestMessage('post', headers, body);
+    request = matlab.net.http.RequestMessage('get', headers);
     
     % Create a HTTPOptions object;
     httpOpts = matlab.net.http.HTTPOptions;
@@ -43,4 +35,4 @@ function [response, streamedText] = Assistant_upload_file(api_key, endpoint,file
         response = send(request, matlab.net.URI(endpoint),httpOpts,consumer);
         streamedText = consumer.ResponseText;
     end
-end
+    end

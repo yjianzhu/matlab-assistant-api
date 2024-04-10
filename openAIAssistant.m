@@ -120,6 +120,7 @@ classdef(Sealed) openAIAssistant < handle
             % -H "Content-Type: application/json" \
             % -H "OpenAI-Beta: assistants=v1" \
             % -X DELETE   
+            %file_id = string(file_id);
             llms.internal.Assistant_delete(this.api_key, this.api_url + "/files/" + file_id);
         end
         
@@ -129,7 +130,7 @@ classdef(Sealed) openAIAssistant < handle
             % -H "Authorization: Bearer $OPENAI_API_KEY" \
             % -F purpose="assistants" \
             % -F file="@mydata.jsonl"
-            return_obj = llms.internal.Assistant_upload_file(this.api_key, "https://api.openai.com/v1/files", file_path);
+            return_obj = llms.internal.openai_upload_file(this.api_key, "https://api.openai.com/v1/files", file_path);
             file_id = return_obj.Body.Data.id;
         end
 
@@ -184,6 +185,44 @@ classdef(Sealed) openAIAssistant < handle
             llms.internal.Assistant_post(this.api_key, this.api_url, {"instructions", instruction});
         end
 
-    end
+        function file_id = add_file(this,file_path)
+            file_id = this.upload_file(file_path);
+            llms.internal.Assistant_post(this.api_key, this.api_url + "/files", {"file_id", file_id});
+        end
 
+        function delete_all_files(this)
+            % Delete all files attached to the assistant
+            % Get the file list
+            file_list = this.get_files();
+            for i = 1:length(file_list.Body.Data.data)
+                this.delete_file(file_list.Body.Data.data(i).id);
+            end
+        end
+
+        function clear_storage(this)
+            % Clear the all files in storage，
+            % Get curl https://api.openai.com/v1/files \
+            % -H "Authorization: Bearer $OPENAI_API_KEY"
+            all_files = llms.internal.openai_get(this.api_key, "https://api.openai.com/v1/files");
+            file_list = this.get_files();
+            % store the file id in the file_list.Body.Data.data.id
+            file_list_id = {};
+            for i = 1:length(file_list.Body.Data.data)
+                file_list_id{i} = file_list.Body.Data.data(i).id;
+            end
+
+            % delete all the files in the storage, not attached to the assistant
+            for i = 1:length(all_files.Body.Data.data)
+                if ~ismember(all_files.Body.Data.data(i).id, file_list_id)
+                    %curl https://api.openai.com/v1/files/file-abc123 \
+                    % -X DELETE \
+                    % -H "Authorization: Bearer $OPENAI_API_KEY"
+
+                    llms.internal.openai_delete(this.api_key, "https://api.openai.com/v1/files/" + all_files.Body.Data.data(i).id);
+                end
+            end
+
+        end
+    end 
+ 
 end
