@@ -122,6 +122,7 @@ classdef(Sealed) openAIAssistant < handle
             % -X DELETE   
             %file_id = string(file_id);
             llms.internal.Assistant_delete(this.api_key, this.api_url + "/files/" + file_id);
+            llms.internal.openai_delete(this.api_key, "https://api.openai.com/v1/files/" + file_id);
         end
         
         function file_id = upload_file(this, file_path)

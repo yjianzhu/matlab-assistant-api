@@ -1,10 +1,13 @@
-a = openAIAssistant(assi_id,api_key);
+a = openAIAssistant(assis_id, api_key);
 a.retrieve();   % retrieve the assistant 
 % file_list = a.get_files();  % get the files in the assistant
 % file_id = file_list.Body.Data.data.id;
 
+fileid = a.add_file("Cell_states_data.xlsx");
+% a.delete_file(fileid);
 
-file_id =a.update_single_file("Cell_states_data.xlsx");
+
+%file_id =a.update_single_file("Cell_states_data.xlsx");
 %a.delete_all_files();
 %a.clear_storage();
 % upload file, if you have old file_id, use

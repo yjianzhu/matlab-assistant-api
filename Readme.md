@@ -13,12 +13,10 @@ a.retrieve();
 
 至此，已经创建好对象，可以利用内建的函数来发送消息或者上传文件。
 
-1. 更新文件，file_id=a.update_single_file("Cell_states_data.xlsx");
-    或者 file_id=a.update_single_file("Cell_states_data.xlsx"，old_file_id);    这里old_file_id 是用于替换旧的文件，如果整个参数省去，就默认删除所有的文件。
-2. 删除文件，a.delete_all_files();
-3. 添加单个文件 a.add_file("Cell_states_data.xlsx");
-4. 更改指示。a.update_instruction("message")
-5. 对话 
+1. 添加文件， file_id = a.add_file("file_name");
+2. 删除文件，a.delete_file();
+3. 更改指示。a.update_instruction("message")
+4. 对话 
    先创建thread，a.Create_thread();
    创建消息a.create_message("hi"); 
    创建运算，res = a.create_run();
@@ -34,3 +32,12 @@ a.retrieve();
 
 ## 建议
 最好在保留文件对应的fild_id，方便管理。
+例如有三个文件需要上传，file1.txt, file2.txt, file3.txt
+
+file1_id = a.add_file("file1.txt");
+file2_id = a.add_file("file2.txt");
+file3_id = a.add_file("file3.txt");
+
+节省费用，可以需要的时候更新一次，不用每次都更新。
+a.delete_file(file1_id);
+a.add_file("file1.txt");
