@@ -1,0 +1,29 @@
+A knot is an intentional complication in cordage[1] which may be practical or decorative, or both. Practical knots are classified by function, including hitches, bends, loop knots, and splices: a hitch fastens a rope to another object; a bend fastens two ends of a rope to each another; a loop knot is any knot creating a loop; and splice denotes any multi-strand knot, including bends and loops.[2] A knot may also refer, in the strictest sense, to a stopper or knob at the end of a rope to keep that end from slipping through a grommet or eye.[3] Knots have excited interest since ancient times for their practical uses, as well as their topological intricacy, studied in the area of mathematics known as knot theory.
+
+纽结的Alexander polynomial又或者叫亚历山大多项式表格如下
+
+knottype	polynomial
+3_1	1-t+t^2
+4_1	1-3*t+t^2
+5_1	1-t+t^2-t^3+t^4
+5_2	2-3*t+2*t^2
+6_1	2-5*t+2*t^2
+6_2	1-3*t+3*t^2-3*t^3+t^4
+6_3	1-3*t+5*t^2-3*t^3+t^4
+7_1	1-t+t^2-t^3+t^4-t^5+t^6
+7_2	3-5*t+3*t^2
+7_3	2-3*t+3*t^2-3*t^3+2*t^4
+7_4	4-7*t+4*t^2
+7_5	2-4*t+5*t^2-4*t^3+2*t^4
+7_6	1-5*t+7*t^2-5*t^3+t^4
+7_7	1-5*t+9*t^2-5*t^3+t^4
+8_1	3-7*t+3*t^2
+8_2	1-3*t+3*t^2-3*t^3+3*t^4-3*t^5+t^6
+8_3	4-9*t+4*t^2
+8_4	2-5*t+5*t^2-5*t^3+2*t^4
+8_5	1-3*t+4*t^2-5*t^3+4*t^4-3*t^5+t^6
+8_6	2-6*t+7*t^2-6*t^3+2*t^4
+8_7	1-3*t+5*t^2-5*t^3+5*t^4-3*t^5+t^6
+8_8	2-6*t+9*t^2-6*t^3+2*t^4
+8_9	1-3*t+5*t^2-7*t^3+5*t^4-3*t^5+t^6
+8_10	1-3*t+6*t^2-7*t^3+6*t^4-3*t^5+t^6

@@ -17,9 +17,20 @@ function [response, streamedText] = Assistant_post(api_key, endpoint, data, time
 
     headers = [matlab.net.http.HeaderField('Content-Type', 'application/json')...
         matlab.net.http.HeaderField('Authorization', "Bearer " + api_key) ...
-        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v1")];
+        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v2")];
     
-    body = matlab.net.http.MessageBody(struct(data{1},data{2}));
+    % TODO, check if data is a cell array,and get the size of the cell array
+    % check the length is even or odd
+    if mod(length(data),2) ~= 0
+        error("data should be a cell array with even number of elements");
+    end
+
+    % Define the request message body
+    structData = {};
+    for i = 1:2:length(data)
+        structData.(data{i}) = data{i+1};
+    end
+    body = matlab.net.http.MessageBody(structData);
     % Define the request message
     request = matlab.net.http.RequestMessage('post', headers, body);
     
