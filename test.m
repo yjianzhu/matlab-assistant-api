@@ -1,7 +1,7 @@
 clear;
 
-assis_id = "";
-api_key  = "";
+assis_id = '';
+api_key  ="";
 
 a = openAIAssistant(assis_id, api_key);
 

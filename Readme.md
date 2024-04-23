@@ -18,7 +18,7 @@ a.retrieve();
 
 1. 添加文件， file_id = a.add_file_to_assis("file_name");
 2. 删除文件， a.delete_file_from_assis(file_id);
-3. 删除文件使用文件名， a.delete_file_by_name_from_assis("file_name");
+3. 删除所有文件， a.delete_all_files_from_assis();
 
 
 #### 2.2 code_interpreter 代码处理
@@ -26,7 +26,7 @@ a.retrieve();
 
 1. 添加文件， a.add_file_to_code_interpreter("file_name");
 2. 删除文件， a.delete_file_from_code_interpreter(file_id);
-3. 删除文件使用文件名， a.delete_file_by_name_from_code_interpreter("file_name");
+3. 删除所有文件， a.delete_all_files_from_code_interpreter();
 
 ### 3. 对话
    先创建thread，a.Create_thread();
