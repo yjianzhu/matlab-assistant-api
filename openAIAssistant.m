@@ -15,7 +15,23 @@ classdef(Sealed) openAIAssistant < handle
             obj.assistant_id = assistant_id;
             obj.api_key = api_key;
             obj.api_url = "https://api.openai.com/v1/assistants/" + assistant_id;
-            obj.map_filename_fileid = containers.Map;
+            obj.update_map();
+        end
+        
+        function update_map(this)
+            % update the map_filename_fileid
+            % if map_filename_fileid is empty
+            temp_map = this.map_filename_fileid;
+            if isempty(this.map_filename_fileid)
+                % read from "map_filename_fileid.mat"
+                if isfile('map_filename_fileid.mat')
+                    load('map_filename_fileid.mat', 'temp_map');
+                else
+                    this.map_filename_fileid = containers.Map;
+                end
+            else
+                save('map_filename_fileid.mat', 'temp_map');
+            end
         end
 
         function response = retrieve(this)
@@ -124,7 +140,8 @@ classdef(Sealed) openAIAssistant < handle
         function delete_file(this, file_id)
             % Delete a file in the storage
             llms.internal.openai_delete(this.api_key, "https://api.openai.com/v1/files/" + file_id);
-            this.map_filename_fileid.remove(file_id);
+            % this.map_filename_fileid.remove(file_id);
+            % this.update_map();
         end
 
         function delete_all_files(this)
@@ -143,7 +160,8 @@ classdef(Sealed) openAIAssistant < handle
             % -F file="@mydata.jsonl"
             return_obj = llms.internal.openai_upload_file(this.api_key, "https://api.openai.com/v1/files", file_path);
             file_id = return_obj.Body.Data.id;
-            this.map_filename_fileid(file_id) = file_path;
+            % this.map_filename_fileid(file_id) = file_path;
+            % this.update_map();
         end
 
         function update_instruction(this, instruction)
@@ -190,7 +208,7 @@ classdef(Sealed) openAIAssistant < handle
             end
         end
 
-        function add_file_to_assis(this,file_path)
+        function file_id = add_file_to_assis(this,file_path)
             % add file to storage, add file_id to vector store
             % vector store id is vs_KPdPyPl6QMv6o4hxMt4tZacK
             file_id = this.upload_file(file_path);
@@ -241,7 +259,15 @@ classdef(Sealed) openAIAssistant < handle
             end
         end
 
-        function add_file_to_code_interpreter(this, file_path)
+        function delete_all_files_from_assis(this)
+            file_list = this.list_file_of_assis();
+            for i = 1:length(file_list.Body.Data.data)
+                this.delete_file_from_assis(file_list.Body.Data.data(i).id);
+            end
+        end
+
+
+        function file_id = add_file_to_code_interpreter(this, file_path)
             file_id = this.upload_file(file_path);
             llms.internal.Assistant_post(this.api_key, this.api_url + "/files", {"file_id", file_id});
         end
@@ -271,6 +297,13 @@ classdef(Sealed) openAIAssistant < handle
                     disp("delete file: " + file_path);
                     this.delete_file_from_code_interpreter(file_list.Body.Data.data(i).id);
                 end
+            end
+        end
+
+        function delete_all_files_from_code_interpreter(this)
+            file_list = this.list_file_of_code_interpreter();
+            for i = 1:length(file_list.Body.Data.data)
+                this.delete_file_from_code_interpreter(file_list.Body.Data.data(i).id);
             end
         end
 
