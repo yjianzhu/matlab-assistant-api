@@ -16,7 +16,7 @@ function [response, streamedText] = Assistant_thread(api_key, endpoint, timeout,
 
     headers = [matlab.net.http.HeaderField('Content-Type', 'application/json')...
         matlab.net.http.HeaderField('Authorization', "Bearer " + api_key) ...
-        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v1")];
+        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v2")];
     
     % Define the request message, 添加空的body
     request = matlab.net.http.RequestMessage('post', headers, "");

@@ -16,7 +16,7 @@ function [response, streamedText] = Assistant_get(api_key, endpoint, timeout, st
 
     headers = [matlab.net.http.HeaderField('Content-Type', 'application/json')...
         matlab.net.http.HeaderField('Authorization', "Bearer " + api_key) ...
-        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v1")];
+        matlab.net.http.HeaderField("OpenAI-Beta","assistants=v2")];
     
     % Define the request message
     request = matlab.net.http.RequestMessage('get', headers);
