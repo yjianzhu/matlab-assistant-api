@@ -1,18 +1,33 @@
 clear;
 
-assis_id = '';
-api_key  ="";
+assis_id = ;
+api_key  =;
+
 
 a = openAIAssistant(assis_id, api_key);
 
 a.retrieve();
 a.Create_thread();
 
-a.create_message("你好？");
-response = a.create_run();
+disp("system files:");
+a.print_file_list_of_assis();
+a.print_file_list_of_code_interpreter();
 
-run_id = response.Body.Data.id;
-a.check_run_status(run_id);
+% delete all the files in the vector_store
+a.delete_all_files_from_assis();
+a.delete_all_files_from_code_interpreter();
 
-return_mess = a.get_message();
-a.deal_message_and_print(return_mess);
+disp("all files deleted");
+a.print_file_list_of_assis();
+a.print_file_list_of_code_interpreter();
+
+% upload the file to the vector_store
+a.add_file_to_assis("cellexplain2.txt");
+a.add_file_to_code_interpreter("Cell.csv");
+disp("file uploaded");
+a.print_file_list_of_assis();
+a.print_file_list_of_code_interpreter();
+
+return_mess = a.dialog("你好")
+
+return_mess = a.dialog("第一个孔位有多少个细胞？")

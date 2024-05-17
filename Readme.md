@@ -29,14 +29,5 @@ a.retrieve();
 3. 删除所有文件， a.delete_all_files_from_code_interpreter();
 
 ### 3. 对话
-   先创建thread，a.Create_thread();
-   创建消息a.create_message("hi"); 
-   创建运算，res = a.create_run();
-   run_id = res.Body.Data.id;
-   检查运输是否完成
-    run_status = a.check_run_status(run_id);
-    if run_status == "completed"
-        return_message = a.get_message();
-        display("ChatGPT: ");
-        a.deal_message_and_print(return_message);
-    end
+   先创建thread，a.Create_thread(); 只需要创建一次。
+   a.dialog("你好");

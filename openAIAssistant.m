@@ -17,6 +17,34 @@ classdef(Sealed) openAIAssistant < handle
             obj.api_url = "https://api.openai.com/v1/assistants/" + assistant_id;
             obj.update_map();
         end
+
+        function dialog_return = dialog(this, message)
+        %dialog the assistant
+        %   dialog_return = dialog(assistant_id, message) returns the completion of the prompt
+        %   returns the completion of the prompt
+            mess_id = this.create_message(message);
+            response = this.create_run();
+            run_id = response.Body.Data.id;
+            run_status = this.check_run_status(run_id);
+            if run_status == "completed"
+                return_message = this.get_all_message();
+                % 返回消息的元组
+                dialog_return = "";
+                return_message = return_message.Body.Data.data;
+                for i = 1:length(return_message)-1
+                    if return_message(i).role ~= "assistant"
+                        break;
+                    end
+                    dialog_return = dialog_return + return_message(i).content.text.value + newline;
+                end
+            else 
+                if run_status == "incomplete"
+                    disp("The run is incomplete");
+                end
+                dialog_return = "The run is not completed";
+            end
+        end
+
         
         function update_map(this)
             % update the map_filename_fileid
@@ -61,7 +89,7 @@ classdef(Sealed) openAIAssistant < handle
             thread_id = thread.Body.Data.id;
         end
 
-        function message_obj = create_message(this, message)
+        function message_id = create_message(this, message)
             %Create a new message
             %   curl https://api.openai.com/v1/threads/thread_abc123/messages \
             %   -H "Content-Type: application/json" \
@@ -75,6 +103,7 @@ classdef(Sealed) openAIAssistant < handle
             cell_message = {"role", "user"; "content", message};
             
             message_obj = llms.internal.Assistant_post(this.api_key, "https://api.openai.com/v1/threads/" + this.thread_id + "/messages",cell_message);
+            message_id = message_obj.Body.Data.id;
         end
 
         function run_obj = create_run(this)
@@ -109,20 +138,28 @@ classdef(Sealed) openAIAssistant < handle
             end
             return_status = return_obj.Body.Data.status;
         end
-        function message_obj = get_message(this)
+        function message_obj = get_all_message(this)
             % Get the message object
             %curl https://api.openai.com/v1/threads/thread_abc123/messages \
             %   -H "Content-Type: application/json" \
             %   -H "Authorization: Bearer $OPENAI_API_KEY" \
-            %   -H "OpenAI-Beta: assistants=v1"
+            %   -H "OpenAI-Beta: assistants=v2"
             message_obj=llms.internal.Assistant_get(this.api_key, "https://api.openai.com/v1/threads/" + this.thread_id + "/messages");
+        end
+        function message_obj = get_message(this,message_id)
+            % Get the message object of single dialog
+            %curl https://api.openai.com/v1/threads/thread_abc123/messages/msg_abc123 \
+            %   -H "Content-Type: application/json" \
+            %   -H "Authorization: Bearer $OPENAI_API_KEY" \
+            %   -H "OpenAI-Beta: assistants=v2"
+            message_obj=llms.internal.Assistant_get(this.api_key, "https://api.openai.com/v1/threads/" + this.thread_id + "/messages/" + message_id);
         end
 
         function deal_message_and_print(~,message_obj)
             %deal with the message and print
             %   message_obj: the message object
             %   print the message
-            for i = 1:length(message_obj.Body.Data.data)
+            for i = 1:length(message_obj.Body.Data.data)-1
                 % 依次输出message_obj.Body.Data.data[i].content.text.value
                 disp(message_obj.Body.Data.data(i).content.text.value);
             end
@@ -210,7 +247,7 @@ classdef(Sealed) openAIAssistant < handle
 
         function file_id = add_file_to_assis(this,file_path)
             % add file to storage, add file_id to vector store
-            % vector store id is vs_KPdPyPl6QMv6o4hxMt4tZacK
+            % vector store id is vs_wzlShsZkN3QH9YijS1PozTrn
             file_id = this.upload_file(file_path);
             % curl https://api.openai.com/v1/vector_stores/vs_abc123/files \
             % -H "Authorization: Bearer $OPENAI_API_KEY" \
@@ -220,7 +257,7 @@ classdef(Sealed) openAIAssistant < handle
             % "file_id": "file-abc123"
             % }'
             % Post
-            llms.internal.Assistant_post(this.api_key, "https://api.openai.com/v1/vector_stores/vs_KPdPyPl6QMv6o4hxMt4tZacK/files", {"file_id", file_id});
+            llms.internal.Assistant_post(this.api_key, "https://api.openai.com/v1/vector_stores/vs_wzlShsZkN3QH9YijS1PozTrn/files", {"file_id", file_id});
         end
 
         function file_list = list_file_of_assis(this)
@@ -229,12 +266,19 @@ classdef(Sealed) openAIAssistant < handle
             % -H "Content-Type: application/json" \
             % -H "OpenAI-Beta: assistants=v2"
             % get
-            file_list = llms.internal.Assistant_get(this.api_key, "https://api.openai.com/v1/vector_stores/vs_KPdPyPl6QMv6o4hxMt4tZacK/files");
+            file_list = llms.internal.Assistant_get(this.api_key, "https://api.openai.com/v1/vector_stores/vs_wzlShsZkN3QH9YijS1PozTrn/files");
 
             % print all the file name
             % for i = 1:length(file_list.Body.Data.data)
             %     disp(this.map_filename_fileid(file_list.Body.Data.data(i).id));
             % end
+        end
+
+        function print_file_list_of_assis(this)
+            file_list = this.list_file_of_assis();
+            for i = 1:length(file_list.Body.Data.data)
+                disp(file_list.Body.Data.data(i).id);
+            end
         end
 
         function delete_file_from_assis(this, file_id)
@@ -243,7 +287,7 @@ classdef(Sealed) openAIAssistant < handle
             % -H "Content-Type: application/json" \
             % -H "OpenAI-Beta: assistants=v2" \
             % -X DELETE
-            llms.internal.Assistant_delete(this.api_key, "https://api.openai.com/v1/vector_stores/vs_KPdPyPl6QMv6o4hxMt4tZacK/files/" + file_id);
+            llms.internal.Assistant_delete(this.api_key, "https://api.openai.com/v1/vector_stores/vs_wzlShsZkN3QH9YijS1PozTrn/files/" + file_id);
             this.delete_file(file_id);
         end
 
@@ -288,6 +332,13 @@ classdef(Sealed) openAIAssistant < handle
             % for i = 1:length(file_list.Body.Data.data)
             %     disp(this.map_filename_fileid(file_list.Body.Data.data(i).id));
             % end
+        end
+
+        function print_file_list_of_code_interpreter(this)
+            file_list = this.list_file_of_code_interpreter();
+            for i = 1:length(file_list.Body.Data.data)
+                disp(file_list.Body.Data.data(i).id);
+            end
         end
 
         function delete_file_by_name_from_code_interpreter(this,file_path)
